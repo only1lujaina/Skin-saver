@@ -1,31 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:image_picker/image_picker.dart';
 
-
-class Taptoscan extends StatefulWidget{
+class Taptoscan extends StatefulWidget {
   @override
   _TaptoscanState createState() => _TaptoscanState();
 }
 
-
 class _TaptoscanState extends State<Taptoscan> {
+  Future<void> _getImageFromGallery() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      // You can now handle the selected file (pickedFile) as needed
+      print('Selected image path: ${pickedFile.path}');
+    }
+  }
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
 
   @override
   void initState() {
     super.initState();
-    _initializeCamera();
+    _initializeControllerFuture = _initializeCamera();
   }
 
-  void _initializeCamera() async {
+  Future<void> _initializeCamera() async {
     final cameras = await availableCameras();
 
     _controller = CameraController(
       cameras.first,
       ResolutionPreset.medium,
     );
-    _initializeControllerFuture = _controller.initialize();
+    return _controller.initialize();
   }
 
   @override
@@ -39,8 +47,7 @@ class _TaptoscanState extends State<Taptoscan> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title:
-        Padding(
+        title: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Text(
             'Get Started',
@@ -51,8 +58,7 @@ class _TaptoscanState extends State<Taptoscan> {
           ),
         ),
       ),
-      body:
-      Row(
+      body: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Column(
@@ -76,8 +82,8 @@ class _TaptoscanState extends State<Taptoscan> {
                   color: Color(0x99a5bde1),
                   borderRadius: BorderRadius.circular(90),
                 ),
-                child:
-                Image.asset('images/mdi_scan.png',
+                child: Image.asset(
+                  'images/mdi_scan.png',
                   height: 94,
                   width: 94,
                 ),
@@ -92,21 +98,15 @@ class _TaptoscanState extends State<Taptoscan> {
                   ),
                   onPressed: () async {
                     try {
-
                       await _initializeControllerFuture;
-
-
                       await _controller.takePicture();
-                    }
-                    catch (e) {
+                    } catch (e) {
                       print(e);
                     }
                   },
-
                   child: const Text(
                     'Tap to Scan',
-                    style:
-                    TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -123,8 +123,8 @@ class _TaptoscanState extends State<Taptoscan> {
                   color: Color(0x99a5bde1),
                   borderRadius: BorderRadius.circular(90),
                 ),
-                child:
-                Image.asset('images/gallery.png',
+                child: Image.asset(
+                  'images/gallery.png',
                   height: 94,
                   width: 94,
                 ),
@@ -137,22 +137,10 @@ class _TaptoscanState extends State<Taptoscan> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0x99a5bde1),
                   ),
-                  onPressed: () async {
-                    try {
-
-                      await _initializeControllerFuture;
-
-
-                      await _controller.takePicture();
-                    }
-                    catch (e) {
-                      print(e);
-                    }
-                  },
+                  onPressed: _getImageFromGallery,
                   child: const Text(
                     'Open from gallery',
-                    style:
-                    TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
